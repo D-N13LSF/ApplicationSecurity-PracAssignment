@@ -1,0 +1,24 @@
+﻿@page
+@model IndexModel
+@inject IHttpContextAccessor HttpContextAccessor
+
+@{
+    ViewData["Title"] = "Welcome to Bookworms Online";
+}
+
+@if (HttpContextAccessor.HttpContext.Session.GetString("AuthToken") == null)
+{
+    <script>
+        window.location.href = ""/Login";
+    </script>
+}
+
+<h1>@ViewData["Title"]</h1>
+<p>Welcome to Bookworms Online, your go-to platform for all things books. Dive into a world of literature and connect with fellow book enthusiasts.</p>
+
+<script>
+    setTimeout(function() {
+        alert("Session expired, please log in again.");
+        window.location.href = "/Login";
+    }, 1200000); // 20 minutes
+</script>

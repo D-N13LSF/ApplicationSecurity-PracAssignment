@@ -1,0 +1,144 @@
+﻿@page
+@model AppSec__practicalAssignment_.Pages.RegisterModel
+@{
+	ViewData["Title"] = "Register";
+}
+<div class="container mt-5">
+
+	<div class="row justify-content-center align-items-center">
+
+		<div class="col-sm-12 col-md-12 col-lg-4">
+			<h1 class="mb-3">Register </h1>
+
+			<form method="post" enctype="multipart/form-data">
+				<div asp-validation-summary="All" class="text-danger"></div>
+
+				<div class="mb-3">
+					<label class="form-label" asp-for="RModel.FirstName">First Name</label>
+					<input type="Text" asp-for="RModel.FirstName" class="form-control" />
+					<span asp-validaton-for="RModel.FirstName" class="text-danger"></span>
+				</div>
+
+				<div class="mb-3">
+					<label class="form-label" asp-for="RModel.LastName">Last Name</label>
+					<input type="Text" asp-for="RModel.LastName" class="form-control" />
+					<span asp-validaton-for="RModel.LastName" class="text-danger"></span>
+				</div>
+
+				<div class="mb-3">
+					<label class="form-label" asp-for="RModel.CreditCardNo">Credit Card</label>
+					<input type="Text" asp-for="RModel.CreditCardNo" class="form-control" />
+					<span asp-validaton-for="RModel.CreditCardNo" class="text-danger"></span>
+				</div>
+
+				<div class="mb-3">
+					<label class="form-label" asp-for="RModel.BillingAdd">Billing Address</label>
+					<input type="Text" asp-for="RModel.BillingAdd" class="form-control" />
+					<span asp-validaton-for="RModel.BillingAdd" class="text-danger"></span>
+				</div>
+
+				<div class="mb-3">
+					<label class="form-label" asp-for="RModel.ShipAdd">Shipping Address</label>
+					<input type="Text" asp-for="RModel.ShipAdd" class="form-control" />
+					<span asp-validaton-for="RModel.ShipAdd" class="text-danger"></span>
+				</div>
+
+				<div class="mb-3">
+					<label class="form-label" asp-for="RModel.MobileNo">Mobile Number</label>
+					<input type="Text" asp-for="RModel.MobileNo" class="form-control" />
+					<span asp-validaton-for="RModel.MobileNo" class="text-danger"></span>
+				</div>
+
+				<div class="mb-3">
+					<label class="form-label" asp-for="RModel.Email">Email</label>
+					<input type="Text" asp-for="RModel.Email" class="form-control" />
+					<span asp-validaton-for="RModel.Email" class="text-danger"></span>
+				</div>
+
+				<div class="mb-3">
+					<label class="form-label" asp-for="RModel.Password">Password</label>
+					<input type="password" asp-for="RModel.Password" class="form-control" id="password"/>
+					<span asp-validaton-for="RModel.Password" class="text-danger"></span>
+				</div>
+				<div id="password-strength" class="mt-2"></div>	
+
+				<div class="mb-3">
+					<label class="form-label" asp-for="RModel.ConfirmPassword">Confirm Password</label>
+					<input type="password" asp-for="RModel.ConfirmPassword" class="form-control" />
+					<span asp-validaton-for="RModel.ConfirmPassword" class="text-danger"></span>
+				</div>
+
+				<div class="mb-3">
+					<label class="form-label" asp-for="RModel.userImage">Profile Image (JPG only)</label>
+					<input type="file" asp-for="RModel.userImage" class="form-control" accept=".jpg,.jpeg" />
+					<span asp-validation-for="RModel.userImage" class="text-danger"></span>
+				</div>
+
+				<div class="mb-3">
+					<button type="submit" class="btn btn-primary">Register</button>
+				</div>
+			</form>
+		</div>
+	</div>
+</div>
+
+@section Scripts {
+	<partial name="_ValidationScriptsPartial" />
+	<script>
+		document.getElementById('password').addEventListener('input', function () {
+			var password = this.value;
+			var strengthText = '';
+			var strength = 0;
+
+			// Check password strength
+			if (password.length >= 8) strength++;
+			if (/[A-Z]/.test(password)) strength++;
+			if (/[a-z]/.test(password)) strength++;
+			if (/[0-9]/.test(password)) strength++;
+			if (/[^A-Za-z0-9]/.test(password)) strength++;
+
+			// Determine strength text
+			switch (strength) {
+				case 0:
+				case 1:
+					strengthText = 'Very Weak';
+					break;
+				case 2:
+					strengthText = 'Weak';
+					break;
+				case 3:
+					strengthText = 'Medium';
+					break;
+				case 4:
+					strengthText = 'Strong';
+					break;
+				case 5:
+					strengthText = 'Very Strong';
+					break;
+			}
+
+			// Update the feedback element
+			var strengthElement = document.getElementById('password-strength');
+			strengthElement.innerText = 'Password Strength: ' + strengthText;
+
+			// Add visual feedback (optional)
+			strengthElement.className = 'mt-2'; // Reset class
+			switch (strength) {
+				case 0:
+				case 1:
+					strengthElement.classList.add('text-danger');
+					break;
+				case 2:
+					strengthElement.classList.add('text-warning');
+					break;
+				case 3:
+					strengthElement.classList.add('text-info');
+					break;
+				case 4:
+				case 5:
+					strengthElement.classList.add('text-success');
+					break;
+			}
+		});
+	</script>
+}
