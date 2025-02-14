@@ -19,6 +19,7 @@ namespace AppSec__practicalAssignment_.Models
 
         public DbSet<UserClass> userClasses { get; set; }
         public DbSet<UserSession> UserSessions { get; set; }
+        public DbSet<AuditLog> AuditLogs { get; set; }
 	}
 }
 

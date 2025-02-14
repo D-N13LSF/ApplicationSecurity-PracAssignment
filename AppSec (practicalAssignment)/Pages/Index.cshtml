@@ -1,4 +1,5 @@
 ﻿@page
+@using System.Net
 @model IndexModel
 @inject IHttpContextAccessor HttpContextAccessor
 
@@ -9,16 +10,45 @@
 @if (HttpContextAccessor.HttpContext.Session.GetString("AuthToken") == null)
 {
     <script>
-        window.location.href = ""/Login";
+        window.location.href = "/Login";
     </script>
 }
 
 <h1>@ViewData["Title"]</h1>
 <p>Welcome to Bookworms Online, your go-to platform for all things books. Dive into a world of literature and connect with fellow book enthusiasts.</p>
 
+<div class="card">
+    <div class="card-body">
+        <h4>User Information</h4>
+        <p><strong>First Name:</strong> @WebUtility.HtmlEncode(Model.CurrentUser.FirstName)</p>
+        <p><strong>Last Name:</strong> @WebUtility.HtmlEncode(Model.CurrentUser.LastName)</p>
+        <p><strong>Email:</strong> @WebUtility.HtmlEncode(Model.CurrentUser.Email)</p>
+        <p><strong>Phone:</strong> @WebUtility.HtmlEncode(Model.CurrentUser.PhoneNumber)</p>
+
+        <!-- Display Decrypted Credit Card Information -->
+        <p><strong>Credit Card:</strong> @WebUtility.HtmlEncode(Model.DecryptedCreditCard)</p>
+
+        <p><strong>Billing Address:</strong> @WebUtility.HtmlEncode(Model.CurrentUser.BillingAdd)</p>
+        <p><strong>Shipping Address:</strong> @WebUtility.HtmlEncode(Model.CurrentUser.ShipAdd)</p>
+
+        <!-- Display User Profile Image -->
+        @if (Model.CurrentUser.userImagePath != null)
+        {
+            <p><strong>Profile Picture:</strong></p>
+            <img src="@Url.Page("Index", "UserImage", new { userId = Model.CurrentUser.Id })" alt="Profile Picture" style="width: 150px; height: auto;">
+        }
+        else
+        {
+            <p>No profile picture available.</p>
+        }
+    </div>
+</div>
+
+
+
 <script>
     setTimeout(function() {
         alert("Session expired, please log in again.");
         window.location.href = "/Login";
-    }, 1200000); // 20 minutes
+    }, 1200000); 
 </script>

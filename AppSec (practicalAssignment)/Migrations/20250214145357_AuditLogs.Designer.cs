@@ -4,6 +4,7 @@ using AppSec__practicalAssignment_.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AppSec__practicalAssignment_.Migrations
 {
     [DbContext(typeof(AuthenDbContext))]
-    partial class AuthenDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250214145357_AuditLogs")]
+    partial class AuditLogs
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

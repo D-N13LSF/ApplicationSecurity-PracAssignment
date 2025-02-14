@@ -12,9 +12,9 @@ namespace AppSec__practicalAssignment_.ViewModels
             {
                 return new ValidationResult("Password is required.");
             }
-            if (password.Length < 8)
+            if (password.Length < 12)
             {
-                return new ValidationResult("Password must be at least 8 characters long.");
+                return new ValidationResult("Password must be at least 12 characters long.");
             }
 
             // Check for combination of lowercase, uppercase, numbers, and special characters
@@ -23,7 +23,8 @@ namespace AppSec__practicalAssignment_.ViewModels
                 !Regex.IsMatch(password, @"[0-9]") ||
                 !Regex.IsMatch(password, @"[\W_]"))
             {
-                return new ValidationResult("Password must contain lowercase, uppercase, numbers, and special characters.");
+                return new ValidationResult("Password must contain lowercase, uppercase," +
+                    " numbers, and special characters.");
             }
 
             return ValidationResult.Success;

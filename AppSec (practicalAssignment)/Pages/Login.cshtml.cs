@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion.Internal;
+using System.Net;
 using System.Security.Claims;
 
 namespace AppSec__practicalAssignment_.Pages.PageLogin
@@ -24,7 +25,8 @@ namespace AppSec__practicalAssignment_.Pages.PageLogin
         [BindProperty]
         public Login LModel { get; set; }
 
-        public LoginModel(SignInManager<UserClass> signInManager, UserManager<UserClass> userManager, AuthenDbContext context, IHttpContextAccessor httpContextAccessor, IConfiguration configuration)
+        public LoginModel(SignInManager<UserClass> signInManager, UserManager<UserClass> userManager, 
+            AuthenDbContext context, IHttpContextAccessor httpContextAccessor, IConfiguration configuration)
         {
             this.signInManager = signInManager;
 			this.userManager = userManager;
@@ -52,10 +54,13 @@ namespace AppSec__practicalAssignment_.Pages.PageLogin
                     return Page();
                 }
 
-                //Locked out
+                // Check if user is locked out
                 if (await userManager.IsLockedOutAsync(user))
                 {
-                    ModelState.AddModelError("", "Account locked due to multiple failed login attempts.");
+                    var lockoutEnd = await userManager.GetLockoutEndDateAsync(user);
+                    ModelState.AddModelError("", $"Account is locked. Try again after {lockoutEnd.Value.LocalDateTime}");
+                    await LogActivity(user.Id, "Attempted login while locked out");
+
                     return Page();
                 }
 
@@ -71,12 +76,15 @@ namespace AppSec__practicalAssignment_.Pages.PageLogin
                 if (result.Succeeded)
                 {
                     // Store secure session values
-                    _httpContextAccessor.HttpContext.Session.SetString("UserId", user.Id);
+                    HttpContext.Session.SetString("UserId", user.Id);
                     HttpContext.Session.SetString("AuthToken", Guid.NewGuid().ToString()); // Prevent session fixation
                     HttpContext.Session.SetString("LastLoginTime", DateTime.UtcNow.ToString());
 
                     // Store device/session tracking info in DB
                     await TrackLoginSession(user.Id, HttpContext.Connection.RemoteIpAddress?.ToString());
+
+                    // Log successful login
+                    await LogActivity(user.Id, "User logged in");
 
                     // Redirect to homepage
                     return RedirectToPage("/Index");
@@ -87,12 +95,15 @@ namespace AppSec__practicalAssignment_.Pages.PageLogin
                     var failedAttempts = await userManager.GetAccessFailedCountAsync(user);
                     if (failedAttempts >= 6)
                     {
-                        await userManager.SetLockoutEndDateAsync(user, DateTimeOffset.UtcNow.AddMinutes(15));
+                        await userManager.SetLockoutEndDateAsync(user, DateTimeOffset.UtcNow.AddMinutes(1));
                         ModelState.AddModelError(string.Empty, "Account locked due to multiple failed login attempts.");
+
+                        await LogActivity(user.Id, "Account locked due to failed login attempts");
                     }
                     else
                     {
                         ModelState.AddModelError(string.Empty, "Username or Password incorrect");
+                        await LogActivity(user.Id, "Failed login attempt");
                     }
 
                     return Page();
@@ -101,17 +112,19 @@ namespace AppSec__practicalAssignment_.Pages.PageLogin
             return Page();
         }
 
-        //private void LogActivity(string userId, string activity)
-        //{
-        //    var auditLog = new AuditLog
-        //    {
-        //        UserId = userId,
-        //        Activity = activity,
-        //        Timestamp = DateTime.UtcNow
-        //    };
-        //    _context.AuditLogs.Add(auditLog);
-        //    _context.SaveChanges();
-        //}
+        public async Task LogActivity(string userId, string activity)
+        {
+            var ipAddress = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "UNKNOWN IP ADDRESS";
+            var auditLog = new AuditLog
+            {
+                UserId = userId,
+                Activity = activity,
+                Timestamp = DateTime.UtcNow,    
+                IPAddress = ipAddress
+            };
+            _context.AuditLogs.Add(auditLog);
+            await _context.SaveChangesAsync();
+        }
 
         private async Task TrackLoginSession(string userId, string ipAddress)
         {

@@ -20,18 +20,22 @@ namespace AppSec__practicalAssignment_.Pages
 		private RoleManager<IdentityRole> roleManager { get; }
 
 		private IWebHostEnvironment _webHostEnvironment;
+        private readonly IDataProtector _protector;
 
 
         [BindProperty]
         public Register RModel { get; set; }
 
-        public RegisterModel(UserManager<UserClass> userManager, SignInManager<UserClass> signInManager, 
-			RoleManager<IdentityRole> roleManager, IWebHostEnvironment webHostEnvironment)
+        public RegisterModel(
+			UserManager<UserClass> userManager, SignInManager<UserClass> signInManager, 
+			RoleManager<IdentityRole> roleManager, IWebHostEnvironment webHostEnvironment, 
+			IDataProtectionProvider dataProtectionProvider)
         {
             this.userManager = userManager;
             this.signInManager = signInManager;
 			this.roleManager = roleManager;
 			_webHostEnvironment = webHostEnvironment;
+            _protector = dataProtectionProvider.CreateProtector("MySecretKey");
         }
 
 		public async Task<IActionResult> OnPostAsync()
@@ -49,15 +53,12 @@ namespace AppSec__practicalAssignment_.Pages
 					}
 				}
 
-                var dataProtectionProvider = DataProtectionProvider.Create("EncryptData");
-                var protector = dataProtectionProvider.CreateProtector("MySecretKey");
-
                 var user = new UserClass
 				{
 					FirstName = RModel.FirstName,
 					LastName = RModel.LastName,
-					CreditCardNo = protector.Protect(RModel.CreditCardNo),
-					PhoneNumber = RModel.MobileNo,
+                    CreditCardNo = _protector.Protect(RModel.CreditCardNo),
+                    PhoneNumber = RModel.MobileNo,
 					BillingAdd = RModel.BillingAdd,
 					ShipAdd = RModel.ShipAdd,
 					UserName = RModel.Email,
@@ -82,7 +83,7 @@ namespace AppSec__practicalAssignment_.Pages
 					result = await userManager.AddToRoleAsync(user, "Admin");
 
 					await signInManager.SignInAsync(user, false);
-					return RedirectToPage("Login");
+					return RedirectToPage("/Login");
 				}
 				foreach (var error in result.Errors)
 				{

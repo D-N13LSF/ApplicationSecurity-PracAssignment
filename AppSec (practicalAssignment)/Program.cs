@@ -2,6 +2,7 @@
 using AppSec__practicalAssignment_.Models;
 using AspNetCore.ReCaptcha;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Options;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -10,9 +11,22 @@ builder.Services.AddRazorPages();
 
 builder.Services.AddDbContext<AuthenDbContext>();
 
-builder.Services.AddIdentity<UserClass, IdentityRole>()
+builder.Services.AddIdentity<UserClass, IdentityRole>(options =>
+{
+    // Enable lockout and configure lockout behavior
+    options.Lockout.MaxFailedAccessAttempts = 3; // 3 failed attempts before lockout
+    options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(1); // Lockout for 1 minute
+    options.Lockout.AllowedForNewUsers = true; // Lockout is enabled for new users by default
+
+})
     .AddEntityFrameworkStores<AuthenDbContext>()
     .AddDefaultTokenProviders();
+
+//options =>
+//{
+//    options.SignIn.RequireConfirmedAccount = true; // Require confirmed email for 2FA
+//    options.Tokens.AuthenticatorTokenProvider = TokenOptions.DefaultAuthenticatorProvider;
+//}
 
 builder.Services.AddReCaptcha(builder.Configuration
     .GetSection("GoogleReCaptcha"));
